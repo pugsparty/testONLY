@@ -1,21 +1,16 @@
-// Generated using webpack-cli https://github.com/webpack/webpack-cli
-
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const WorkboxWebpackPlugin = require("workbox-webpack-plugin");
-const ESLintPlugin = require("eslint-webpack-plugin");
 
-const isProduction = process.env.NODE_ENV == "production";
-
-const stylesHandler = isProduction
-  ? MiniCssExtractPlugin.loader
-  : "style-loader";
+const stylesHandler = MiniCssExtractPlugin.loader;
 
 const config = {
   entry: "./src/index.tsx",
+  mode: "development",
   output: {
     path: path.resolve(__dirname, "dist"),
+    filename: "bundle.js",
+    clean: true,
   },
   devServer: {
     open: true,
@@ -23,7 +18,7 @@ const config = {
     compress: true,
   },
   plugins: [
-    new ESLintPlugin(),
+    new MiniCssExtractPlugin(),
     new HtmlWebpackPlugin({
       template: "index.html",
     }),
@@ -36,23 +31,17 @@ const config = {
       {
         test: /\.(ts|tsx)$/i,
         loader: "ts-loader",
-        exclude: ["/node_modules/"],
+        exclude: /node_modules/,
       },
       {
-        test: /\.s[ac]ss$/i,
+        test: /\.(scss|css)$/,
         use: [
           stylesHandler,
-          "css-loader",
-          "postcss-loader",
-          "sass-loader",
-          "style-loader",
+          "style-loader", // 3. Инжектит стили в DOM
+          "css-loader", // 2. Преобразует CSS в CommonJS
+          "sass-loader", // 1. Компилирует SCSS в CSS
         ],
       },
-      {
-        test: /\.css$/i,
-        use: [stylesHandler, "css-loader", "postcss-loader"],
-      },
-
       {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
         type: "asset",
@@ -62,28 +51,16 @@ const config = {
         exclude: /node_modules/,
         use: { loader: "babel-loader" },
       },
-
       // Add your rules for custom modules here
       // Learn more about loaders from https://webpack.js.org/loaders/
     ],
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".jsx", ".js", "...", "--jsx"],
+    extensions: [".tsx", ".ts", ".jsx", ".js", ".css", ".scss"],
     alias: {
-      "@": path.resolve(__dirname, "src"),
+      "@": path.join(__dirname, "src"),
     },
   },
 };
 
-module.exports = () => {
-  if (isProduction) {
-    config.mode = "production";
-
-    config.plugins.push(new MiniCssExtractPlugin());
-
-    config.plugins.push(new WorkboxWebpackPlugin.GenerateSW());
-  } else {
-    config.mode = "development";
-  }
-  return config;
-};
+module.exports = config;
