@@ -39,5 +39,9 @@
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
     "dev": "webpack serve"
+  },
+  "dependencies": {
+    "gsap": "^3.12.5",
+    "swiper": "^11.1.15"
   }
 }

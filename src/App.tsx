@@ -1,13 +1,11 @@
 import React from "react";
-import "./App.module.scss";
+import Timeline from "./UI/Timeline/Timeline";
+import "./App.scss";
 
 export const App = () => {
   return (
-    <>
-      <div className="mainContainer">
-        <div className="box">Hello world</div>
-        <h1 className="title">ЧТО ТО ЗДЕСЬ</h1>
-      </div>
-    </>
+    <div className="app">
+      <Timeline />
+    </div>
   );
 };

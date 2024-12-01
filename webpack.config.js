@@ -2,11 +2,14 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-const stylesHandler = MiniCssExtractPlugin.loader;
+const isProduction = process.env.NODE_ENV === "production";
+
+const stylesHandler = isProduction
+  ? MiniCssExtractPlugin.loader
+  : "style-loader";
 
 const config = {
   entry: "./src/index.tsx",
-  mode: "development",
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
@@ -18,13 +21,10 @@ const config = {
     compress: true,
   },
   plugins: [
-    new MiniCssExtractPlugin(),
     new HtmlWebpackPlugin({
       template: "index.html",
     }),
-
-    // Add your plugins here
-    // Learn more about plugins from https://webpack.js.org/configuration/plugins/
+    isProduction && new MiniCssExtractPlugin(),
   ],
   module: {
     rules: [
@@ -34,13 +34,12 @@ const config = {
         exclude: /node_modules/,
       },
       {
-        test: /\.(scss|css)$/,
-        use: [
-          stylesHandler,
-          "style-loader", // 3. Инжектит стили в DOM
-          "css-loader", // 2. Преобразует CSS в CommonJS
-          "sass-loader", // 1. Компилирует SCSS в CSS
-        ],
+        test: /\.s[ac]ss$/i,
+        use: [stylesHandler, "css-loader", "postcss-loader", "sass-loader"],
+      },
+      {
+        test: /\.css$/i,
+        use: [stylesHandler, "css-loader", "postcss-loader"],
       },
       {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
@@ -51,8 +50,6 @@ const config = {
         exclude: /node_modules/,
         use: { loader: "babel-loader" },
       },
-      // Add your rules for custom modules here
-      // Learn more about loaders from https://webpack.js.org/loaders/
     ],
   },
   resolve: {
@@ -63,4 +60,11 @@ const config = {
   },
 };
 
-module.exports = config;
+module.exports = () => {
+  if (isProduction) {
+    config.mode = "production";
+  } else {
+    config.mode = "development";
+  }
+  return config;
+};
